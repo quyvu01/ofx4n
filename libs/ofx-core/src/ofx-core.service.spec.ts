@@ -1,30 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { OfxCoreService } from './ofx-core.service';
 import { Member } from './testModels/member.dto';
-import { OfXDecorator } from '@app/ofx-core/abstractions/ofx.decorator';
-
-describe('OfxCoreService', () => {
-  let service: OfxCoreService;
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [OfxCoreService],
-    }).compile();
-
-    service = module.get<OfxCoreService>(OfxCoreService);
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-});
+import { OfXFieldMetadata } from '@app/ofx-core/abstractions/ofxFieldMetadata.interface';
 
 describe('MemberOf', () => {
   const member = new Member();
   member.id = '1';
   member.userId = '2';
 
-  const dependencies = getUserOfDependencies(member);
+  const dependencies = scanOfXDecorators(member);
 
   console.log(dependencies);
 
@@ -35,16 +17,19 @@ describe('MemberOf', () => {
   });
 });
 
-function getUserOfDependencies(obj: any): Record<string, string> {
-  const result: Record<string, any> = {};
-
-  for (const key of Object.keys(obj)) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const metadata = Reflect.getMetadata('ofx:field', obj, key);
-    if (metadata instanceof OfXDecorator) {
-      result[key] = metadata;
+export function scanOfXDecorators(
+  target: object,
+): Record<string, OfXFieldMetadata> {
+  const result: Record<string, OfXFieldMetadata> = {};
+  for (const key of Object.keys(target)) {
+    const meta = Reflect.getMetadata(
+      'ofx:field',
+      target,
+      key,
+    ) as OfXFieldMetadata;
+    if (meta?.kind === 'ofx') {
+      result[key] = meta;
     }
   }
-
   return result;
 }

@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import { IMappableRequestHandler } from '../abstractions/mappableRequestHandler.interface';
 import { OfXDecorator } from '../abstractions/ofx.decorator';
 import { IContext } from '../abstractions/ofxContext.interface';
@@ -9,6 +10,7 @@ import { ItemsResponse } from '../responses/itemResponse';
 import { OfXDataResponse } from '../responses/ofxDataResponse';
 import { RequestContextImpl } from './requestContextImpl';
 
+@Injectable()
 export class SendPipelinesOrchestrator<T extends OfXDecorator>
   implements ISendPipelinesWrapped
 {
